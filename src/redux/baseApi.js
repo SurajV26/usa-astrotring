@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-    baseURL: "https://usbackend.astrotring.com/api"
+    baseURL: "https://backend.astrotring.com/api"
 })
 
 api.interceptors.request.use((config) => {
