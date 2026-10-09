@@ -1,0 +1,240 @@
+import { Route, Routes, useLocation } from "react-router-dom";
+import Layout from "./layout/Layout";
+
+// import Astrodetails from './pages/AstrologerDetails'
+import { lazy, Suspense, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import AstroLayout from "./layout/AstroLayout";
+import { AstrologerProfile, GetAllAstrologer } from "./redux/slice/AstroAuth";
+import Astrodetails from "./components/Astrodetails";
+import { userProfile } from "./redux/slice/UserAuth";
+// import Annanprashan from "./pages/FooterMahurat/Annanprashan";
+// import Namkaran from "./pages/FooterMahurat/Namkaran";
+// import CarBike from "./pages/FooterMahurat/CarBike";
+// import Marriage from "./pages/FooterMahurat/Marriage";
+// import BhumiPuja from "./pages/FooterMahurat/BhumiPuja";
+// import GrihaPravesh from "./pages/FooterMahurat/GrihaPravesh";
+// import Mundan from "./pages/FooterMahurat/Mundan";
+import GoogleTagManager from "./components/common/GoogleTagManager";
+import Loader from "./components/common/Loader";
+import PageNotFound from "./components/common/PageNotFound";
+
+// import AuthHOC from "@/components/Home/AuthHOC";
+// import AIChatBot from "@/components/AIChatBot/AIChatBot";
+// import AllAiAstrologers from "./components/AIChatBot/AllAiAstrologers";
+// import GlobalRechargeModal from "./components/recharge/GlobalRechargeModal";
+// import AuthHOC from "@/components/Home/AuthHOC";
+
+// import BlogPage from "./pages/BlogPage";
+
+const Home = lazy(() => import("./pages/Home"));
+const FreeKundli = lazy(() => import("./pages/kundli/FreeKundli"));
+const Blog = lazy(() => import("./pages/Blog/Blog"));
+const BlogDetails = lazy(() => import("./pages/Blog/BlogDetails"));
+const ChatWithAstro = lazy(() => import("./pages/chatwithAstro/ChatWithAstro"));
+const CallwithAstro = lazy(() => import("./pages/callwithAstro/callwithAstro"));
+const AstrologerDetails = lazy(() => import("./pages/AstrologerDetails"));
+const AstroLogin = lazy(() => import("./components/AstroLogin"));
+const AstroRegister = lazy(() => import("./components/AstroRegistration"));
+const HoroscopeDetails = lazy(
+  () => import("./components/Horoscopes/HoroscopeDetails"),
+);
+
+const Horoscopes = lazy(() => import("./pages/Horoscopes"));
+const StaticHoroscopesMonthlyAndYearly = lazy(
+  () =>
+    import("./pages/staticHoroscopesMonthlyAndYearly/StaticHoroscopesMonthlyAndYearly"),
+);
+const UpdateUser = lazy(() => import("./components/Home/UpdateUser"));
+const ForgotPassword = lazy(() => import("./components/ForgotPasswordUser"));
+const ForgotPasswordAstro = lazy(
+  () => import("./components/ForgotPasswordAstro"),
+);
+
+const Dashboard = lazy(() => import("./pages/AstroDashboard/Dashboard"));
+const UpdateAstro = lazy(() => import("./pages/AstroDashboard/UpdateAstro"));
+const Wallet = lazy(() => import("./pages/AstroDashboard/Wallet"));
+const WidhdrowHistory = lazy(
+  () => import("./pages/AstroDashboard/WidhdrowHistory"),
+);
+const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
+
+// all policies are lazy loaded
+const DisclaimerPage = lazy(() => import("./pages/legal/DisclaimerPage"));
+const ContactUsPage = lazy(() => import("./pages/legal/ContactUsPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/legal/PrivacyPolicyPage"));
+const RefundPolicyPage = lazy(() => import("./pages/legal/RefundPolicyPage"));
+const ShippingPolicyPage = lazy(
+  () => import("./pages/legal/ShippingPolicyPage"),
+);
+const TermsAndConditionsPage = lazy(
+  () => import("./pages/legal/TermsAndConditionsPage"),
+);
+const AstrologerServiceProviderTermsAndConditionsPage = lazy(
+  () => import("./pages/legal/AstrologerServiceProviderTermsAndConditionsPage"),
+);
+
+// all mahurat
+const Annanprashan = lazy(() => import("./pages/FooterMahurat/Annanprashan"));
+
+const Namkaran = lazy(() => import("./pages/FooterMahurat/Namkaran"));
+
+const CarBike = lazy(() => import("./pages/FooterMahurat/CarBike"));
+
+const Marriage = lazy(() => import("./pages/FooterMahurat/Marriage"));
+
+const BhumiPuja = lazy(() => import("./pages/FooterMahurat/BhumiPuja"));
+
+const GrihaPravesh = lazy(() => import("./pages/FooterMahurat/GrihaPravesh"));
+
+const Mundan = lazy(() => import("./pages/FooterMahurat/Mundan"));
+
+// ai astrologers and ai chatbot
+const AllAiAstrologers = lazy(() => import("./components/AIChatBot/AllAiAstrologers"));
+const AiAstrologerDetails = lazy(() => import("./components/Home/aiAstrologers/AiAstrologerDetails"));
+const AIChatBot = lazy(() => import("@/components/AIChatBot/AIChatBot"));
+
+
+const GlobalRechargeModal = lazy(() => import("./components/recharge/GlobalRechargeModal"));
+
+const App = () => {
+  const path = useLocation().pathname;
+  const dispatch = useDispatch();
+  const { astrologer, isAuthenticated } = useSelector((state) => state.astroAuth);
+  const { user, isLoggedIn } = useSelector((state) => state.userAuth);
+  const [role, setRole] = useState(localStorage.getItem("role_id"));
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role_id");
+    setRole(storedRole);
+  }, []);
+
+  useEffect(() => {
+    if (role == 2 && !astrologer && isAuthenticated) {
+      // console.log(" Dispatching astroProfile! in app");
+      dispatch(AstrologerProfile());
+    }
+
+    if (role == 3 && !user && isLoggedIn) {
+      // console.log(" Dispatching userProfile! in app");
+      dispatch(userProfile());
+    }
+  }, [dispatch, role, astrologer, user, isAuthenticated, isLoggedIn]);
+
+  // useEffect(() => {
+  //   window.scrollTo(0, 0);
+  // }, [path]);
+  useEffect(() => {
+    if (!path.includes("/findHoroschope/") && !path.includes("/services")) {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }
+  }, [path]);
+
+  const fatchAstrologers = async () => {
+    await dispatch(GetAllAstrologer()).unwrap();
+  };
+
+  useEffect(() => {
+    fatchAstrologers();
+  }, [dispatch]);
+
+  return (
+    <>
+      <Suspense fallback={<div className="text-center py-10">Loading...</div>}>
+        <GoogleTagManager />
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/free-kundli" element={<FreeKundli />} />
+            <Route path="/update-user" element={<UpdateUser />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route
+              path="/forgot-password-astro"
+              element={<ForgotPasswordAstro />}
+            />
+            {/* <Route path='/chat-with-astrologer' element={<ChatWithAstro />} /> */}
+            <Route path="/talk-to-astrologer" element={<CallwithAstro />} />
+            <Route path="/astro-details/:id" element={<Astrodetails />} />
+
+            {/* this old rote is not in use from now for horocopes */}
+            <Route path="/horoscopes/:date" element={<Horoscopes />} />
+            <Route
+              path="/horoscopes/:time/:horos"
+              element={<HoroscopeDetails />}
+            />
+
+            {/* this route is used for horoscope */}
+            <Route
+              path="/findHoroschope/:timePeriod/:zodiac?"
+              element={<StaticHoroscopesMonthlyAndYearly />}
+            />
+
+            {/* all policies are here */}
+            <Route path="/contact-information" element={<ContactUsPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route
+              path="/terms-conditions"
+              element={<TermsAndConditionsPage />}
+            />
+            <Route path="/disclaimer" element={<DisclaimerPage />} />
+            <Route
+              path="/astrologer-serviceProvider-TnC"
+              element={<AstrologerServiceProviderTermsAndConditionsPage />}
+            />
+
+            {/* astro route */}
+            <Route path="/astro-login" element={<AstroLogin />} />
+            <Route path="/astro-register" element={<AstroRegister />} />
+            {/* <Route path="/blogs" element={<Blog />} />
+            <Route path="/blogs/:id" element={<BlogDetails />} /> */}
+            <Route path="/blogs" element={<Blog />} />
+            <Route path="/blogs/:slug?" element={<BlogDetails />} />
+            <Route path="/services/:slug?" element={<ServiceDetail />} />
+
+            {/* all muhurt's are here */}
+            <Route path="/annaprashan-muhurat" element={<Annanprashan />} />
+            <Route path="/namkaran-muhurat" element={<Namkaran />} />
+            <Route path="/car-bike-muhurat" element={<CarBike />} />
+            <Route path="/marriage-muhurat" element={<Marriage />} />
+            <Route path="/bhoomi-pujan-muhurat" element={<BhumiPuja />} />
+            <Route path="/griha-pravesh-muhurat" element={<GrihaPravesh />} />
+            <Route path="/mundan-muhurat" element={<Mundan />} />
+
+            {/* royte for ai chatbot */}
+            <Route path="/ai-astrologer/:slug" element={<AiAstrologerDetails />} />
+            <Route path="/chat/all-ai-astrologer" element={<AllAiAstrologers />} />
+          </Route>
+
+          {/* chatboat  */}
+          <Route
+            path="/ai-chat/:astrologerSlug/:expertiseSlug?" element={
+              <Suspense fallback={<Loader message="Loading Chat..." />}>
+                <AIChatBot />
+              </Suspense>
+            } />
+
+          {/* Dashboard starts from here */}
+          <Route path="/dashboard" element={<AstroLayout />}>
+            <Route path="/dashboard/profile" element={<Dashboard />} />
+            <Route path="/dashboard/update-astro" element={<UpdateAstro />} />
+            <Route path="/dashboard/wallet" element={<Wallet />} />
+            <Route
+              path="/dashboard/recharge-history"
+              element={<WidhdrowHistory />}
+            />
+          </Route>
+
+          {/* Fallback for every URL that does not match a route above. */}
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+
+      </Suspense>
+      <Suspense fallback={null}><GlobalRechargeModal /></Suspense>
+    </>
+  );
+};
+
+export default App;

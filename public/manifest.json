@@ -1,0 +1,20 @@
+{
+  "name": "Astrotring",
+  "short_name": "Astrotring",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFEF7",
+  "theme_color": "#FFFEF7",
+  "icons": [
+    {
+      "src": "/manifestIcon.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/manifestIcon.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

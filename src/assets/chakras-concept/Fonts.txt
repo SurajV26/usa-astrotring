@@ -1,0 +1,5 @@
+Fonts used in this design:
+
+Font: Salsa
+Author: John Vargas Beltrán
+Url: https://www.fontsquirrel.com/fonts/salsa

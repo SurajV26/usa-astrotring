@@ -1,0 +1,319 @@
+// footer.jsx
+
+import faviconlogo from "@/assets/logo.png";
+import { Mail } from "lucide-react";
+import { Link } from "react-router-dom";
+import { FaAnglesRight, FaApple } from "react-icons/fa6";
+import {
+  TiSocialFacebook,
+  TiSocialTwitter,
+  TiSocialYoutube,
+} from "react-icons/ti";
+import { SlSocialInstagram } from "react-icons/sl";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { getHoroscope } from "@/redux/slice/HoroscopesSlice";
+
+const Footer = () => {
+  const { horoscope } = useSelector((state) => state.horoscope);
+  const [horosType, setHorosType] = useState([]);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!horoscope) {
+      dispatch(getHoroscope());
+    }
+  }, [horoscope, dispatch]);
+
+  useEffect(() => {
+    if (horoscope?.length > 0) {
+      const set = new Set();
+      const list = [];
+
+      horoscope.forEach((ele) => {
+        if (ele.type && !set.has(ele.type)) {
+          if (ele.type.toLowerCase() === "weekly") return;
+
+          set.add(ele.type);
+
+          const type = ele.type.toLowerCase();
+
+          list.push({
+            label: ele.type.charAt(0).toUpperCase() + ele.type.slice(1) + " Horoscope",
+            path: `/findHoroschope/${type}`,
+          });
+        }
+      });
+
+      setHorosType(list);
+    }
+  }, [horoscope]);
+  return (
+    <footer className=" text-gray-800 pt-10">
+      <div className="mx-auto px-2 md:px-10">
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-10 pb-12">
+          {/* ABOUT */}
+          <div>
+            <Link to="/">
+              <img src={faviconlogo} className="h-12 mb-4" alt="Logo" />
+            </Link>
+            <p className="text-sm leading-relaxed">Astrotring offers accurate Vedic astrology insights including kundli matching, horoscope predictions, and expert astrologer consultations to guide important life decisions. Our platform blends ancient astrological wisdom with modern technology to provide guidance on love, marriage, career, health, and finance.</p>
+          </div>
+
+          {/* HOROSCOPE + SHUBH MUHURAT */}
+          <div>
+            <h4 className="font-semibold text-lg border-b border-yellow-500 pb-1 inline-block">
+              Horoscope
+            </h4>
+
+            <ul className="mt-4 space-y-2 text-sm">
+              {horosType.map((horos) => (
+                <li key={horos.path}>
+                  <Link
+                    to={horos.path}
+                    className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                  >
+                    <FaAnglesRight /> {horos.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <h4 className="font-semibold text-lg border-b border-yellow-500 pb-1 mt-6 inline-block">
+              Shubh Muhurat {new Date().getFullYear()}
+            </h4>
+
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <Link
+                  to="/annaprashan-muhurat"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Annanprashan Muhurat
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/namkaran-muhurat"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Naamkaran Muhurat
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/car-bike-muhurat"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Car/Bike Muhurat
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/marriage-muhurat"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Marriage Muhurat
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/bhoomi-pujan-muhurat"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Bhoomi Pujan Muhurat
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/griha-pravesh-muhurat"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Griha Pravesh Muhurat
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/mundan-muhurat"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Mundan Muhurat
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* ASTROLOGER + CORPORATE */}
+          <div>
+            <h4 className="font-semibold text-lg border-b border-yellow-500 pb-1 inline-block">
+              Astrologer
+            </h4>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <Link
+                  to="/astro-login"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Astrologer Login
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/astro-register"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Astrologer Registration
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/blogs"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Astrology Blogs
+                </Link>
+              </li>
+            </ul>
+
+            <h4 className="font-semibold text-lg border-b border-yellow-500 pb-1 mt-6 inline-block">
+              Corporate Info
+            </h4>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <Link
+                  to="/contact-information"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight />Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/refund-policy"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Refund & Cancellation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/terms-conditions"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/privacy-policy"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/disclaimer"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Disclaimer
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/shipping-policy"
+                  className="flex items-center gap-2 hover:text-primary transition-all duration-200 hover:translate-x-1"
+                >
+                  <FaAnglesRight /> Shipping Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* CONTACT */}
+          <div>
+            <h4 className="font-semibold text-lg border-b border-yellow-500 pb-1 inline-block">
+              Contact Us
+            </h4>
+
+            <p className="text-sm text-black leading-relaxed mt-4">
+              We are available 24x7 on chat support, <a
+                href="https://wa.me/919485628238?text=Hi%20I%20need%20help"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold hover:text-yellow-600"
+              >click to start chat</a>
+            </p>
+
+            <div className="mt-4">
+              <a
+                href="mailto:care@astrotring.com"
+                className="flex items-center gap-3 text-sm text-black hover:text-primary"
+              >
+                <Mail className="size-8 border border-gray-900 p-1.5 rounded-full" />
+                care@astrotring.com
+              </a>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <TiSocialFacebook
+                size={18}
+                className="hover:text-primary cursor-pointer"
+              />
+              <SlSocialInstagram
+                size={18}
+                className="hover:text-primary cursor-pointer"
+              />
+              <TiSocialTwitter
+                size={18}
+                className="hover:text-primary cursor-pointer"
+              />
+              <TiSocialYoutube
+                size={18}
+                className="hover:text-primary cursor-pointer"
+              />
+            </div>
+
+            <h4 className="mt-6 font-semibold text-black text-lg">
+              Download Our App
+            </h4>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
+              <a
+                href="#"
+                target="_blank"
+                className="flex items-center justify-center gap-3 bg-black text-white rounded-lg px-5 py-2.5 hover:bg-gray-800 transition-all duration-300 hover:scale-105 shadow-md"
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Google_Play_Arrow_logo.svg"
+                  alt="Google Play"
+                  className="w-4 h-4"
+                />
+                <span className="text-sm font-semibold">
+                  Google Play
+                </span>
+              </a>
+
+              <a
+                href="#"
+                target="_blank"
+                className="flex items-center justify-center gap-3 bg-black text-white rounded-lg px-5 py-2.5 hover:bg-gray-800 transition-all duration-300 hover:scale-105 shadow-md"
+              >
+                <FaApple size={20} />
+                <span className="text-sm font-semibold">
+                  App Store
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-black text-center text-white py-4">
+        © {new Date().getFullYear()} Astrotring. All Rights Reserved.
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
