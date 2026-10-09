@@ -21,26 +21,27 @@ import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
-import { userProfile, userRegister } from "@/redux/slice/UserAuth";
-import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
-import ForgotPassword from "./ForgotPasswordUser";
 import {
+  userProfile,
+  userRegister,
   userSendLoginOtp,
   userVerifyLoginOtp,
   userResendLoginOtp,
 } from "@/redux/slice/UserAuth";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+import ForgotPassword from "./ForgotPasswordUser";
 import { useCountryCodes } from "@/hooks/useCountryCodes";
 import axios from "axios";
 
 /* ---------------- ZOD SCHEMAS ---------------- */
 
-const loginMobileSchema = z.object({
-  mobile: z.string().min(10, "Mobile must be at least 10 digits"),
+const loginEmailSchema = z.object({
+  email: z.string().min(1, "Please enter your email"),
 });
 
 const loginOtpSchema = z.object({
-  otp: z.string().min(6, "OTP must be 6 digits"),
+  otp: z.string().min(4, "OTP must be at least 4 digits"),
 });
 
 const signupSchema = z.object({
@@ -129,8 +130,8 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Login OTP states
-  const [loginStep, setLoginStep] = useState("mobile");
-  const [mobileNumber, setMobileNumber] = useState("");
+  const [loginStep, setLoginStep] = useState("email");
+  const [emailAddress, setEmailAddress] = useState("");
   const [otpValue, setOtpValue] = useState("");
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -179,6 +180,9 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
       });
       setBirthPlaceInput("");
       setPlaceSuggestions([]);
+      setLoginStep("email");
+      setEmailAddress("");
+      setOtpValue("");
     }
   }, [user]);
 
@@ -270,24 +274,22 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
     }));
   };
 
-  // OTP Login handlers
+  // OTP Login handlers (Email & OTP)
   const handleSendOtp = async (e) => {
     e.preventDefault();
 
-    const result = loginMobileSchema.safeParse({ mobile: mobileNumber });
+    const trimmedEmail = emailAddress.trim();
+    const result = loginEmailSchema.safeParse({ email: trimmedEmail });
 
     if (!result.success) {
-      toast.error(result.error.errors[0].message);
+      toast.error(result.error.errors[0]?.message || "Please enter a valid email address");
       return;
     }
-    if (!mobileNumber || mobileNumber.length < 10) {
-      toast.error("Please enter a valid mobile number");
-      return;
-    }
+
     setOtpLoading(true);
     try {
-      await dispatch(userSendLoginOtp(mobileNumber)).unwrap();
-      toast.success("OTP sent to your mobile");
+      await dispatch(userSendLoginOtp(trimmedEmail)).unwrap();
+      toast.success("OTP sent to your email");
       setLoginStep("otp");
       setResendCooldown(30);
     } catch (err) {
@@ -299,23 +301,23 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    const result = loginOtpSchema.safeParse({ otp: otpValue });
+    const trimmedOtp = otpValue.trim();
+    const result = loginOtpSchema.safeParse({ otp: trimmedOtp });
     if (!result.success) {
-      toast.error(result.error.errors[0].message);
+      toast.error(result.error.errors[0]?.message || "Please enter a valid OTP");
       return;
     }
-    if (!otpValue || otpValue.length < 6) {
-      toast.error("Please enter the OTP");
-      return;
-    }
+
     setOtpLoading(true);
     try {
       await dispatch(
-        userVerifyLoginOtp({ mobile: mobileNumber, otp: otpValue }),
+        userVerifyLoginOtp({ mobile: emailAddress.trim(), otp: trimmedOtp }),
       ).unwrap();
       toast.success("Login successful");
       await dispatch(userProfile()).unwrap();
       setOpen(false);
+      setLoginStep("email");
+      setOtpValue("");
     } catch (err) {
       toast.error(err || "Invalid OTP");
     } finally {
@@ -328,7 +330,7 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
     if (resendCooldown > 0) return; // safety
     setOtpLoading(true);
     try {
-      await dispatch(userResendLoginOtp(mobileNumber)).unwrap();
+      await dispatch(userResendLoginOtp(emailAddress.trim())).unwrap();
       toast.success("OTP resent");
       setResendCooldown(30);
     } catch (err) {
@@ -392,6 +394,10 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
 
   const handleOpenChange = (newOpen) => {
     setOpen(newOpen);
+    if (!newOpen) {
+      setLoginStep("email");
+      setOtpValue("");
+    }
     if (onOpenChange) onOpenChange(newOpen);
   };
 
@@ -428,42 +434,27 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
               </p>
             )}
 
-            {/* ===================== LOGIN (OTP) ===================== */}
+            {/* ===================== LOGIN (EMAIL & OTP) ===================== */}
             {mode === "login" && (
               <div className="space-y-4 mt-4 ">
-                {loginStep === "mobile" ? (
+                {loginStep === "email" ? (
                   <form onSubmit={handleSendOtp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="login-mobile">Mobile Number</Label>
+                      <Label htmlFor="login-email">Email Address</Label>
                       <Input
-                        id="login-mobile"
-                        type="tel"
-                        placeholder="Enter Your Mobile Number"
-                        value={mobileNumber}
-                        onChange={(e) =>
-                          setMobileNumber(
-                            e.target.value.replace(/\D/g, "").slice(0, 10),
-                          )
-                        }
+                        id="login-email"
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={emailAddress}
+                        onChange={(e) => setEmailAddress(e.target.value)}
                         required
                         className="focus:ring-2 focus:ring-amber-400 transition"
                       />
                     </div>
-                    {/* <div className="text-right cursor-pointer">
-                      <span
-                        onClick={() => {
-                          setMode("forgot");
-                          setUserType("user");
-                        }}
-                        className="text-orange-600 text-sm hover:underline"
-                      >
-                        Forgot Password?
-                      </span>
-                    </div> */}
                     <Button
                       type="submit"
-                      disabled={otpLoading || mobileNumber.length < 10}
-                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all"
+                      disabled={otpLoading || !emailAddress.trim()}
+                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all cursor-pointer"
                     >
                       {otpLoading ? "Sending..." : "Send OTP"}
                     </Button>
@@ -497,39 +488,39 @@ const UserLogin = ({ ele, defaultOpen = false, onOpenChange }) => {
                         required
                         className="focus:ring-2 focus:ring-amber-400 transition"
                       />
-                      {/* <div className="flex items-center justify-between mt-2">
-                        <p className="text-xs text-gray-400">
-                          OTP sent to {mobileNumber}
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-gray-500">
+                          OTP sent to {emailAddress}
                         </p>
                         <button
                           type="button"
                           onClick={handleResendOtp}
                           disabled={resendCooldown > 0 || otpLoading}
-                          className="text-sm text-amber-600 hover:underline disabled:opacity-50"
+                          className="text-xs text-amber-600 hover:underline disabled:opacity-50 cursor-pointer"
                         >
                           {resendCooldown > 0
                             ? `Resend in ${resendCooldown}s`
                             : "Resend OTP"}
                         </button>
-                      </div> */}
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-400">
-                      OTP sent to {mobileNumber}
-                    </p>
 
                     <Button
                       type="submit"
                       disabled={otpLoading || otpValue.length < 4}
-                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all"
+                      className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg shadow-lg hover:shadow-xl transition-all cursor-pointer"
                     >
                       {otpLoading ? "Verifying..." : "Verify & Login"}
                     </Button>
                     <button
                       type="button"
-                      onClick={() => setLoginStep("mobile")}
-                      className="text-sm text-amber-600 hover:underline block w-full text-center"
+                      onClick={() => {
+                        setLoginStep("email");
+                        setOtpValue("");
+                      }}
+                      className="text-sm text-amber-600 hover:underline block w-full text-center cursor-pointer"
                     >
-                      ← Change mobile number
+                      ← Change email address
                     </button>
                   </form>
                 )}

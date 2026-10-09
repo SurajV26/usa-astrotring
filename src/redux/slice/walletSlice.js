@@ -115,10 +115,16 @@ const walletSlice = createSlice({
     payoutHistory: [],
     loading: false,
     error: null,
+    availableQuestions: Number(localStorage.getItem('availableQuestions') || 0),
   },
   reducers: {
     clearWalletError: (state) => {
       state.error = null;
+    },
+    addQuestions: (state, action) => {
+      const count = Number(action.payload) || 0;
+      state.availableQuestions = (state.availableQuestions || 0) + count;
+      localStorage.setItem('availableQuestions', String(state.availableQuestions));
     },
   },
   extraReducers: (builder) => {
@@ -213,5 +219,5 @@ const walletSlice = createSlice({
   },
 });
 
-export const { clearWalletError } = walletSlice.actions;
+export const { clearWalletError, addQuestions } = walletSlice.actions;
 export default walletSlice.reducer;

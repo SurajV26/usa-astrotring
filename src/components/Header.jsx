@@ -17,10 +17,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, Sparkles } from "lucide-react";
 import { GiStarShuriken } from "react-icons/gi";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom"; // changed this line
+import { openRechargeModal } from "@/redux/slice/uiSlice";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import UserLogin from "./UserLogin";
@@ -316,6 +317,14 @@ const Header = () => {
         </div>
 
         <div className="hidden lg:flex items-center space-x-4 ">
+          <Button
+            onClick={() => dispatch(openRechargeModal())}
+            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium rounded-full px-4 text-sm shadow-sm cursor-pointer flex items-center gap-1.5"
+          >
+            <Sparkles className="w-4 h-4" />
+            Buy questions
+          </Button>
+
           {astrologer?.name || user?.name ? (
             <DropdownMenu
               open={isDropdownOpen}
@@ -359,12 +368,22 @@ const Header = () => {
           )}
         </div>
 
-        <Sheet>
-          <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
+        <div className="flex items-center space-x-2 lg:hidden">
+          <Button
+            size="sm"
+            onClick={() => dispatch(openRechargeModal())}
+            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium rounded-full px-3 text-xs shadow-sm cursor-pointer flex items-center gap-1"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Buy questions
+          </Button>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
 
           <SheetContent side="right" className="w-80">
             <SheetHeader>
@@ -430,6 +449,7 @@ const Header = () => {
             </ScrollArea>
           </SheetContent>
         </Sheet>
+        </div>
       </div>
     </header>
   );
